@@ -18,6 +18,8 @@ services:
     - eureka
     logging:
       driver: json-file
+    env_file:
+    - .env
 
 networks:
   devit-network:
