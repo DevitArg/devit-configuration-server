@@ -46,3 +46,33 @@ encrypt:
 
 If you need to checkout the base project what I drafted before including its logic within the current one, this is the project:
 [devit-configuration-server-docker](https://github.com/DevitArg/devit-configuration-server-docker)
+
+#### Encrypt values
+It is enough to do a `curl` command like this one:
+
+```
+curl --user "user:password" localhost:8888/encrypt -d 'Hello DevIt!'
+```
+
+As spring security as been included into the pom you will need to provide the following properties or env variables (the later more recommended to prevent publish server credentials):
+
+```
+security:
+    user:
+        name: user
+        password: password
+```
+Whenever is desirable to disable security just add this to the `application.yml` file `security.basic.enable: false`. Having
+this set, `curl` command it is:
+
+```
+curl localhost:8888/encrypt -d 'Hello DevIt!'
+```
+
+The value retrieved for that is: `AQAXXhy05MYZn35gFAF160dJ+3R19z13AI//vnuFMmHo19g9djy3jm4zJpkrBKmAQMjp37xFsBIyo9j1YxbC9BwfYOxCPbjN7Wc4kEOEsTSLX2ht/eB1AMKPpjZ5rrDoRjsN3sr2y/xE0C0Jo7xf7ftYneyyHE98sInftGwsWBZq+wH1qp9VW93c+Wlf9FjktDsLSXfDcnoxb6kKWAB7RKoTp5TlzoHc6NJtZlHbsyGmyIf98vOzz9wTUoVQCNvoWo083+Q9kfI2f340nw5eu0kHwCi1gr0S3jBo43IGVf9wIOn+Ni46wTmas4GdfHlSdK810WBwCEOADx5ezv8SCMWhJuqTszmUNwrZvwIYMfASREUit+xoq98pcdpWKGVz2ls=`
+
+Now, having said that, if you want to decrypt it just need to:
+
+```
+curl --user "uservice:password" localhost:8888/decrypt -d 'AQAXXhy05MYZn35gFAF160dJ+3R19z13AI//vnuFMmHo19g9djy3jm4zJpkrBKmAQMjp37xFsBIyo9j1YxbC9BwfYOxCPbjN7Wc4kEOEsTSLX2ht/eB1AMKPpjZ5rrDoRjsN3sr2y/xE0C0Jo7xf7ftYneyyHE98sInftGwsWBZq+wH1qp9VW93c+Wlf9FjktDsLSXfDcnoxb6kKWAB7RKoTp5TlzoHc6NJtZlHbsyGmyIf98vOzz9wTUoVQCNvoWo083+Q9kfI2f340nw5eu0kHwCi1gr0S3jBo43IGVf9wIOn+Ni46wTmas4GdfHlSdK810WBwCEOADx5ezv8SCMWhJuqTszmUNwrZvwIYMfASREUit+xoq98pcdpWKGVz2ls='
+```
