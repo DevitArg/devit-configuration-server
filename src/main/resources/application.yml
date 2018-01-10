@@ -7,3 +7,10 @@ spring:
       server:
         git:
           uri: https://github.com/DevitArg/uservices-config.git
+
+encrypt:
+  key-store:
+    location: classpath:keystore.jks
+    password: password
+    alias: default
+    secret: password

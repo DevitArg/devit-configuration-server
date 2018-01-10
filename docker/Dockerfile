@@ -27,5 +27,7 @@ RUN ./create_jks.sh \
     --alias $alias --keystorename $keystorename \
     --storepass $storepass --validity $validity
 
+RUN jar uf app.jar $keystorename.jks
+
 EXPOSE 8888
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
