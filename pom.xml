@@ -17,6 +17,11 @@
 
     <properties>
         <docker.image.prefix>dev-it</docker.image.prefix>
+        <!-- Default values for JKS file which will be included into the docker image -->
+        <jks.alias>default</jks.alias>
+        <jks.keystorename>keystore</jks.keystorename>
+        <jks.storepass>password</jks.storepass>
+        <jks.validity>365</jks.validity>
     </properties>
 
     <dependencyManagement>
@@ -58,7 +63,7 @@
             <resource>
                 <directory>${basedir}</directory>
                 <includes>
-                    <include>Dockerfile</include>
+                    <include>docker/**</include>
                 </includes>
                 <targetPath>${basedir}/target</targetPath>
                 <filtering>true</filtering>
@@ -84,6 +89,12 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <buildArgs>
+                        <alias>${jks.alias}</alias>
+                        <keystorename>${jks.keystorename}</keystorename>
+                        <storepass>${jks.storepass}</storepass>
+                        <validity>${jks.validity}</validity>
+                    </buildArgs>
                     <forceTags>true</forceTags>
                     <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
                     <imageTags>
