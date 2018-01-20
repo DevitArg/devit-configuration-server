@@ -4,7 +4,8 @@ RUN touch /app.jar
 
 # install unzip
 RUN apt-get install unzip
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update --allow-unauthenticated
+RUN apt-get install --allow-unauthenticated -y curl
 
 # download JCE
 RUN cd /tmp/ && \
