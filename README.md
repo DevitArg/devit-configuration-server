@@ -2,50 +2,50 @@ Cloud Configuration server provider, based on Spring Cloud, intended to deliver 
 You are able to provide encryption to your secrets with this server as one of its main features.
 
 #### Building Docker Image
-You will note within `pom.xml` file the following properties:
+Configuration server docker image is composed by a customised base image which contains the ability of creating a
+the JKS encryption key for you to encrypt sensitive configuration.
+
+To build the docker image which is gonna be your actual configuration server you will need to follow the steps below:
+1) Go to `docker-base` directory and execute the following command with your values.
 
 ```
-<properties>
-    ...
-    <jks.alias>default</jks.alias>
-    <jks.keystorename>keystore</jks.keystorename>
-    <jks.storepass>password</jks.storepass>
-    <jks.validity>365</jks.validity>
-</properties>
+docker build -t dev-it:configuration-server-<environment-name-you-want-to-build> \
+    --build-arg alias=<your-alias> \
+    --build-arg keystorename=<your-keystorename> \
+    --build-arg storepass=<your-password> \
+    --build-arg validity=<amount-of-days> .
 ```
-These are the default values which your jks key for encryption will be created with.
-Spring properties are:
+This will generate a base docker image for your server.
+
+2) After doing that replace on you configuration files for the values you entered before
 
 ```
 encrypt:
   key-store:
-    location: classpath:keystore.jks
-    password: password
-    alias: default
-    secret: password
+    location: classpath:<your-keystorename>.jks
+    password: <your-password>
+    alias: <your-alias>
+    secret: <your-password>
 ```
 
-If you want to override them, you will need to provide a JKS' parameters to build it at maven `install` phase.
-E.g:
-```
-mvn clean install -Djks.alias=newAlias \
-    -Djks.keystorename=newKeystoreName \
-    -Djks.storepass=newStorepass \
-    -Djks.validity=365
-```
-If you manually override the defaults, you will need to change the spring properties as well:
-```
-encrypt:
-  key-store:
-    location: classpath:newKeystoreName.jks
-    password: newStorepass
-    alias: newAlias
-    secret: newStorepass
-```
-(Properties located within `application.yml` file)*[]: 
+3) After that, you will need to build the actual server using `mvn clean install` command. Default environment to build is `dev`, but you could
+override it by calling
 
-If you need to checkout the base project what I drafted before including its logic within the current one, this is the project:
-[devit-configuration-server-docker](https://github.com/DevitArg/devit-configuration-server-docker)
+```
+mvn clean install -Ddocker.environment=<environment-you-want-to-build>
+```
+
+This will produce consuming the corresponding `docker-<environment-you-want-to-build>` folder. So if you are going to create a new environment you must create a new
+`docker-<new-env>` folder with the `Dockerfile` like this:
+
+```
+FROM dev-it:configuration-server-<new-env>:latest
+ADD *.jar app.jar
+RUN touch /app.jar
+RUN jar uf app.jar *.jks
+EXPOSE 8888
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
+```
 
 #### Encrypt values
 It is enough to do a `curl` command like this one:

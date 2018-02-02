@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # USAGE ./create_jks --alias keyalias --keystorename server --storepass YbGf69YUKLnN --validity 365
+mkdir -p /BOOT-INF/classes/
+cd /BOOT-INF/classes/
+pwd
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -46,10 +49,11 @@ echo VALIDITY="${VALIDITY}"
 if [[ -n $ALIAS && -n $KEYSTORE_NAME && -n $STOREPASS && -n $VALIDITY ]]
 then
     echo "Generating a key pair jks file...."
-    keytool -genkeypair -keyalg RSA \
-      -dname "CN=Web Server,OU=Unit,O=Organization,L=City,S=State,C=US" \
+    keytool -genkeypair -keyalg RSA -keysize 4096 -sigalg SHA512withRSA \
+      -dname "CN=DEVIT,OU=Unit,O=Organization,L=City,S=State,C=US" \
       -alias ${ALIAS} \
-      -keystore ${KEYSTORE_NAME}.jks -storepass ${STOREPASS} \
+      -keystore ${KEYSTORE_NAME}.jks \
+      -storepass ${STOREPASS} \
       -validity ${VALIDITY}
 
     if [[ $? -eq 0 ]]

@@ -18,11 +18,21 @@
     <properties>
         <docker.image.prefix>dev-it</docker.image.prefix>
         <!-- Default values for JKS file which will be included into the docker image -->
-        <jks.alias>default</jks.alias>
-        <jks.keystorename>keystore</jks.keystorename>
-        <jks.storepass>password</jks.storepass>
-        <jks.validity>365</jks.validity>
+        <docker.environment>dev</docker.environment>
+        <docker.environment.folder>docker-${docker.environment}</docker.environment.folder>
+        <docker.debug.disabled>true</docker.debug.disabled>
+        <docker.debug.config></docker.debug.config>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>docker-debug</id>
+            <properties>
+                <docker.debug.disabled>false</docker.debug.disabled>
+                <docker.debug.config>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005</docker.debug.config>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencyManagement>
         <dependencies>
@@ -65,6 +75,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -73,11 +87,11 @@
                 <directory>${project.basedir}/src/main/resources</directory>
             </resource>
             <resource>
-                <directory>${basedir}</directory>
+                <directory>${docker.environment.folder}</directory>
                 <includes>
-                    <include>docker/**</include>
+                    <include>Dockerfile</include>
                 </includes>
-                <targetPath>${basedir}/target</targetPath>
+                <targetPath>${basedir}/target/docker</targetPath>
                 <filtering>true</filtering>
             </resource>
         </resources>
@@ -86,6 +100,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludeDevtools>${docker.debug.disabled}</excludeDevtools>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -101,12 +118,6 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <buildArgs>
-                        <alias>${jks.alias}</alias>
-                        <keystorename>${jks.keystorename}</keystorename>
-                        <storepass>${jks.storepass}</storepass>
-                        <validity>${jks.validity}</validity>
-                    </buildArgs>
                     <forceTags>true</forceTags>
                     <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
                     <imageTags>
@@ -121,7 +132,29 @@
                             <include>${project.build.finalName}.jar</include>
                         </resource>
                     </resources>
+                    <buildArgs>
+                        <debugConfig>${docker.debug.config}</debugConfig>
+                    </buildArgs>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <echo>docker.environment: ${docker.environment}</echo>
+                                <echo>docker.debug.config: ${docker.debug.config}</echo>
+                                <echo>docker.debug.disabled: ${docker.debug.disabled}</echo>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
